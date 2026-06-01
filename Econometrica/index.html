@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Кластерный анализ и эконометрическое моделирование регионов РФ | Отчёт</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #f4f7fc;
+            color: #0a1c2f;
+            line-height: 1.5;
+        }
+
+        .navbar {
+            background: #0b2b40;
+            color: white;
+            padding: 0.85rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        .navbar-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .logo {
+            font-weight: 800;
+            font-size: 1.3rem;
+            background: #2c7da0;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            letter-spacing: -0.3px;
+        }
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            list-style: none;
+        }
+        .nav-links a {
+            color: #e7f0f5;
+            text-decoration: none;
+            padding: 0.4rem 0.9rem;
+            border-radius: 2rem;
+            transition: 0.2s;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        .nav-links a:hover {
+            background: #2c7da0;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1.8rem;
+        }
+
+        .page-section {
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.05);
+            padding: 2rem 2rem 2.5rem;
+            margin-bottom: 3rem;
+            scroll-margin-top: 90px;
+            transition: all 0.2s;
+        }
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            border-left: 7px solid #2c7da0;
+            padding-left: 1.2rem;
+            margin-bottom: 1.8rem;
+            color: #0b2b40;
+        }
+        h3 {
+            font-size: 1.6rem;
+            margin: 1.8rem 0 1rem;
+            color: #1f5068;
+            font-weight: 600;
+        }
+        h4 {
+            font-size: 1.3rem;
+            margin: 1.2rem 0 0.8rem;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        p {
+            margin-bottom: 1rem;
+            text-align: justify;
+            font-size: 1rem;
+        }
+        .figure-container {
+            background: #f8fafd;
+            border-radius: 1.5rem;
+            padding: 1.5rem 1rem;
+            margin: 1.8rem 0;
+            text-align: center;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+        .figure-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background: white;
+        }
+        .fig-caption {
+            margin-top: 0.75rem;
+            font-size: 0.85rem;
+            color: #2c6079;
+            font-style: italic;
+        }
+        pre {
+            background: #0e2a34;
+            color: #e2f0f7;
+            padding: 1.2rem;
+            border-radius: 1rem;
+            overflow-x: auto;
+            font-family: 'Fira Code', 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            margin: 1.2rem 0;
+            box-shadow: inset 0 0 0 1px #2e5a6b;
+        }
+        code {
+            background: #e4edf2;
+            padding: 0.2rem 0.45rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-family: monospace;
+            color: #1a4b63;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 1.8rem 0;
+            border-radius: 1rem;
+            border: 1px solid #cbdde6;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        th, td {
+            border: 1px solid #cbdde6;
+            padding: 0.8rem 0.9rem;
+            vertical-align: top;
+        }
+        th {
+            background: #e9f2f7;
+            font-weight: 700;
+            color: #0b2b40;
+        }
+        .formula {
+            background: #eef4f9;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            padding: 1rem 1.2rem;
+            border-left: 5px solid #2c7da0;
+            margin: 1.2rem 0;
+            border-radius: 0.8rem;
+            font-weight: 500;
+        }
+        .insight {
+            background: #eef2fc;
+            padding: 1rem 1.4rem;
+            border-radius: 1rem;
+            border-left: 4px solid #2c7da0;
+            margin: 1rem 0;
+        }
+        footer {
+            text-align: center;
+            padding: 2rem;
+            background: #e2edf3;
+            color: #1f5068;
+            border-radius: 2rem 2rem 0 0;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+        @media (max-width: 800px) {
+            .container { padding: 1rem; }
+            .page-section { padding: 1.3rem; }
+            .section-title { font-size: 1.6rem; }
+            h3 { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="navbar-container">
+        <div class="logo">📊 Эконометрика | Регионы РФ</div>
+        <ul class="nav-links">
+            <li><a href="#intro">Введение</a></li>
+            <li><a href="#stage1">Этап 1</a></li>
+            <li><a href="#stage2">Этап 2</a></li>
+            <li><a href="#stage3">Этап 3</a></li>
+            <li><a href="#stage4">Этап 4</a></li>
+            <li><a href="#stage5">Этап 5</a></li>
+            <li><a href="#conclusion">Заключение</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <!-- СТРАНИЦА 1: ВВЕДЕНИЕ (без изображений) -->
+    <section id="intro" class="page-section">
+        <div class="section-title">📖 Введение: неоднородность социально-экономического пространства России</div>
+        <p>Социально-экономическое пространство России традиционно характеризуется значительной неоднородностью: субъекты Федерации заметно различаются по масштабам экономики, уровню доходов населения, инновационной активности, демографической динамике и состоянию рынка труда. Такая дифференциация создаёт серьёзные вызовы для проведения сбалансированной региональной политики и требует не только описания сложившихся разрывов, но и выделения устойчивых групп территорий со схожими чертами, а также количественного анализа факторов, определяющих их экономический потенциал. Актуальность работы обусловлена необходимостью перехода от усреднённых оценок к типологизации регионов, позволяющей адресно выявлять ключевые драйверы и барьеры развития для каждого типа территорий.</p>
+        <p><strong>Цель настоящего исследования</strong> — на основе данных официальной статистики по 79 субъектам РФ провести многомерную классификацию регионов методами кластерного анализа и с помощью регрессионных моделей определить факторы, влияющие на величину валового регионального продукта на душу населения, в том числе с учётом принадлежности регионов к выделенным кластерам.</p>
+        <div class="insight">
+            <strong>🎯 Задачи исследования:</strong> подготовка и нормализация показателей, визуальный разведочный анализ; применение иерархической кластеризации и k-средних; обоснование числа кластеров; характеристика групп; построение регрессионных моделей (общей, с дамми-переменными, внутрикластерных).
+        </div>
+        <!-- Изображений во введении нет (image1 не используется) -->
+    </section>
+
+    <!-- ЭТАП 1: Сбор данных + image2 (фрагмент датасета) -->
+    <section id="stage1" class="page-section">
+        <div class="section-title">📁 Этап 1. Сбор данных и формирование выборки</div>
+        <p>В соответствии с целью исследования, направленного на многомерную классификацию регионов и анализ факторов душевого ВРП, был сформирован исходный набор социально-экономических показателей. Сбор информации осуществлялся с официального сайта Федеральной службы государственной статистики (Росстат) за 2022–2024 гг.</p>
+        <p><strong>Отобранные индикаторы:</strong> численность населения (тыс. чел., 2022); валовой региональный продукт (млн руб., 2024); численность исследователей, имеющих учёную степень (чел., 2024); число семей, получивших жилые помещения и улучшивших жилищные условия (ед., 2024); среднемесячная номинальная начисленная заработная плата (руб., 2024); численность безработных в возрасте 15 лет и старше (тыс. чел., 2024).</p>
+        <p>Из первоначальной совокупности исключены Москва, Санкт-Петербург, Московская область, ХМАО, ЯНАО, Ненецкий АО. Итоговый массив: <strong>79 субъектов РФ</strong>.</p>
+        <div class="table-wrapper">
+            <table>
+                <caption>📌 Перечень переменных после переименования</caption>
+                <thead><tr><th>Код</th><th>Описание</th><th>Единица</th><th>Период</th></tr></thead>
+                <tbody>
+                    <tr><td>Population</td><td>Численность населения</td><td>тыс. чел.</td><td>2022</td></tr>
+                    <tr><td>GRP</td><td>Валовой региональный продукт</td><td>млн руб.</td><td>2024</td></tr>
+                    <tr><td>Researchers</td><td>Исследователи с учёной степенью</td><td>чел.</td><td>2024</td></tr>
+                    <tr><td>Households</td><td>Улучшившие жилищные условия</td><td>ед.</td><td>2024</td></tr>
+                    <tr><td>Wage</td><td>Среднемесячная зарплата</td><td>руб.</td><td>2024</td></tr>
+                    <tr><td>Unemployed</td><td>Безработные (15+)</td><td>тыс. чел.</td><td>2024</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="figure-container">
+            <img src="images/image2.png" alt="Фрагмент датасета" onerror="this.src='images/image2.jpg'">
+            <div class="fig-caption">Рисунок 1 — Фрагмент исходных данных (первые строки)</div>
+        </div>
+    </section>
+
+    <!-- ЭТАП 2: предобработка + визуализация (image3 – image8) -->
+    <section id="stage2" class="page-section">
+        <div class="section-title">🛠️ Этап 2. Предварительная обработка и разведочный анализ</div>
+        <p>Проверка на пропуски показала их отсутствие. Применена <strong>MinMax-нормализация</strong> (значения в интервал [0,1]), сохраняющая форму распределения.</p>
+        <pre><code>minmax <- function(x) { (x - min(x)) / (max(x) - min(x)) }
+regions_norm <- regions %>% mutate(across(where(is.numeric), minmax))</code></pre>
+        <p>Построены точечные графики связи GRP с каждым фактором и боксплоты.</p>
+        
+        <div class="figure-container">
+            <img src="images/image3.png" alt="Связь ВРП и численности населения" onerror="this.src='images/image3.jpg'">
+            <div class="fig-caption">Рисунок 2 — ВРП и численность населения</div>
+        </div>
+        <div class="figure-container">
+            <img src="images/image4.png" alt="Связь ВРП и исследователей" onerror="this.src='images/image4.jpg'">
+            <div class="fig-caption">Рисунок 3 — ВРП и численность исследователей</div>
+        </div>
+        <div class="figure-container">
+            <img src="images/image5.png" alt="ВРП и получившие жильё" onerror="this.src='images/image5.jpg'">
+            <div class="fig-caption">Рисунок 4 — ВРП и число семей, улучшивших жильё</div>
+        </div>
+        <div class="figure-container">
+            <img src="images/image6.png" alt="ВРП и средняя зарплата" onerror="this.src='images/image6.jpg'">
+            <div class="fig-caption">Рисунок 5 — ВРП и средняя заработная плата</div>
+        </div>
+        <div class="figure-container">
+            <img src="images/image7.png" alt="ВРП и безработные" onerror="this.src='images/image7.jpg'">
+            <div class="fig-caption">Рисунок 6 — ВРП и численность безработных</div>
+        </div>
+        <div class="figure-container">
+            <img src="images/image8.png" alt="Боксплот нормализованных показателей" onerror="this.src='images/image8.jpg'">
+            <div class="fig-caption">Рисунок 7 — Распределение нормализованных показателей (boxplot)</div>
+        </div>
+    </section>
+
+    <!-- ЭТАП 3: кластеризация (image9, image10, image11) -->
+    <section id="stage3" class="page-section">
+        <div class="section-title">🧩 Этап 3. Выбор и применение методов кластеризации</div>
+        <p>Рассчитана матрица евклидовых расстояний. Иерархическая кластеризация методом Варда (ward.D). Оптимальное число кластеров k=3 (сбалансированные группы). Дополнительно применён k-means. Тест Краскела–Уоллиса подтвердил значимые различия между кластерами (p-value < 0.05).</p>
+        <div class="figure-container">
+            <img src="images/image9.png" alt="Дендрограмма иерархической кластеризации" onerror="this.src='images/image9.jpg'">
+            <div class="fig-caption">Рисунок 8 — Иерархическая кластеризация (3 кластера)</div>
+        </div>
+        <div class="figure-container">
+            <img src="images/image10.png" alt="Кластеры k-means" onerror="this.src='images/image10.jpg'">
+            <div class="fig-caption">Рисунок 9 — Кластеры субъектов РФ (k-средних)</div>
+        </div>
+        <div class="figure-container">
+            <img src="images/image11.png" alt="Тест Краскела-Уоллиса p-values" onerror="this.src='images/image11.jpg'">
+            <div class="fig-caption">Рисунок 10 — Результаты теста Краскела–Уоллиса (все p<0.05)</div>
+        </div>
+        <pre><code>d <- dist(df_num)
+hc <- hclust(d, method = "ward.D")
+set.seed(123)
+km <- kmeans(df_num, centers = 3, nstart = 25)</code></pre>
+    </section>
+
+    <!-- ЭТАП 4: интерпретация кластеров + image12, image13, image14 -->
+    <section id="stage4" class="page-section">
+        <div class="section-title">🗺️ Этап 4. Интерпретация кластеров и содержательный анализ</div>
+        <p><strong>Кластер 1 (Средний уровень)</strong> — 44 региона, низкие показатели GRP, населения, зарплат, низкая безработица.<br>
+        <strong>Кластер 2 (Лидеры)</strong> — 18 регионов, высокие GRP, население, зарплаты, но высокая безработица.<br>
+        <strong>Кластер 3 (Депрессивные)</strong> — 17 регионов, высокий GRP, максимальная зарплата, отрицательная миграция.</p>
+        <div class="table-wrapper">
+            <table>
+                <caption>📊 Средние значения по кластерам (исходные масштабы)</caption>
+                <thead><tr><th>Кластер</th><th>Регионов</th><th>GRP (млн руб.)</th><th>Population (тыс.)</th><th>Wage (руб.)</th></tr></thead>
+                <tbody>
+                    <tr><td>1 (Средний)</td><td>44</td><td>538 303</td><td>885</td><td>64 200</td></tr>
+                    <tr><td>2 (Лидеры)</td><td>18</td><td>639 828</td><td>3 216</td><td>74 500</td></tr>
+                    <tr><td>3 (Депрессивные)</td><td>17</td><td>1 491 263</td><td>1 163</td><td>94 000</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="figure-container">
+            <img src="images/image12.png" alt="Таблица распределения субъектов по кластерам" onerror="this.src='images/image12.jpg'">
+            <div class="fig-caption">Рисунок 11 — Распределение субъектов по кластерам (список)</div>
+        </div>
+        <div class="figure-container">
+            <img src="images/image13.png" alt="Сводная таблица средних" onerror="this.src='images/image13.jpg'">
+            <div class="fig-caption">Рисунок 12 — Сводная таблица средних по кластерам</div>
+        </div>
+        <div class="figure-container">
+            <img src="images/image14.png" alt="Карта России с кластерами" onerror="this.src='images/image14.jpg'">
+            <div class="fig-caption">Рисунок 13 — Распределение субъектов РФ по кластерам (иерархическая кластеризация)</div>
+        </div>
+    </section>
+
+    <!-- ЭТАП 5: регрессионный анализ (image15, image16, image17, image18, image19, image20) -->
+    <section id="stage5" class="page-section">
+        <div class="section-title">📐 Этап 5. Эконометрическое моделирование: факторы GRP</div>
+        <p>Для всей выборки построена множественная регрессия. После пошагового исключения (backward) получена оптимальная модель:</p>
+        <div class="formula">
+            <strong>Формула 2 (оптимальная модель):</strong><br>
+            GRP = 31 110 000 + 414,9·Housing1 + 2259·Morbidity – 302 700·CPI – 24,99·Crime + 35 530·NaturalIncrease<br>
+            (R² = 0.457, Adj. R² = 0.420)
+        </div>
+        <div class="figure-container">
+            <img src="images/image15.png" alt="Полная модель регрессии" onerror="this.src='images/image15.jpg'">
+            <div class="fig-caption">Рисунок 14 — Результаты полной модели множественной регрессии</div>
+        </div>
+        <div class="figure-container">
+            <img src="images/image16.png" alt="Оптимальная модель после отбора" onerror="this.src='images/image16.jpg'">
+            <div class="fig-caption">Рисунок 15 — Модель после backward selection</div>
+        </div>
+
+        <h3>Модель с фиктивными переменными кластеров</h3>
+        <p>Добавлены дамми для кластеров (база — кластер 2 «Лидеры»). Коэффициенты при кластерах незначимы.</p>
+        <div class="figure-container">
+            <img src="images/image17.png" alt="Регрессия с дамми-переменными" onerror="this.src='images/image17.jpg'">
+            <div class="fig-caption">Рисунок 16 — Модель с добавлением фиктивных переменных кластеров</div>
+        </div>
+
+        <h3>Внутрикластерные регрессии</h3>
+        <p>Для каждого кластера построены отдельные модели с пошаговым отбором. Структура факторов существенно различается.</p>
+        <div class="figure-container">
+            <img src="images/image18.png" alt="Регрессия для кластера 1" onerror="this.src='images/image18.jpg'">
+            <div class="fig-caption">Рисунок 17 — Модель внутри кластера 1 (средний уровень)</div>
+        </div>
+        <div class="figure-container">
+            <img src="images/image19.png" alt="Регрессия для кластера 2" onerror="this.src='images/image19.jpg'">
+            <div class="fig-caption">Рисунок 18 — Модель внутри кластера 2 (лидеры)</div>
+        </div>
+        <div class="figure-container">
+            <img src="images/image20.png" alt="Регрессия для кластера 3" onerror="this.src='images/image20.jpg'">
+            <div class="fig-caption">Рисунок 19 — Модель внутри кластера 3 (депрессивные)</div>
+        </div>
+        <pre><code># Разделение данных и пошаговая регрессия
+cl1 <- filter(reg_data, cluster_h == "1")
+full_cl1 <- lm(GRP ~ Housing1 + Morbidity + NetMigration + CPI + Crime + Innovation + NaturalIncrease, data=cl1)
+step_cl1 <- step(full_cl1, direction="backward", trace=0)</code></pre>
+    </section>
+
+    <!-- ЗАКЛЮЧЕНИЕ (без изображений) -->
+    <section id="conclusion" class="page-section">
+        <div class="section-title">🔎 Заключение: выводы и рекомендации</div>
+        <p>В ходе исследования на данных по 79 субъектам РФ (исключая экстремальные регионы) методами кластерного анализа выделены три устойчивые группы регионов: «Средний уровень» (44 региона), «Лидеры» (18 регионов) и «Депрессивные» (17 регионов). Статистическая значимость различий между кластерами подтверждена тестом Краскела–Уоллиса (p < 0.05).</p>
+        <p>Регрессионный анализ показал, что для всей выборки значимое влияние на GRP оказывают жилищные условия (положительно), заболеваемость (положительно), инфляция (отрицательно) и преступность (отрицательно). Включение фиктивных переменных кластеров не дало значимых коэффициентов, то есть различия между группами объясняются уже учтёнными факторами. Внутрикластерные модели выявили разную структуру влияния: для лидеров ключевая роль инфляции, для депрессивных регионов — жилищные условия, заболеваемость и преступность (с отрицательным знаком), а для среднего уровня — специфические корреляции.</p>
+        <p>Полученные результаты могут служить основой для дифференцированной региональной политики.</p>
+        <p><em>Работа выполнена с использованием языка R, библиотек dplyr, ggplot2, cluster, factoextra, sf.</em></p>
+    </section>
+
+    <footer>
+        <strong>ДВФУ | Школа экономики и менеджмента</strong> — Кафедра бизнес-информатики и экономико-математических методов<br>
+        Отчёт по курсу «Эконометрика»: кластерный анализ и регрессионное моделирование регионов РФ, 2026 г.
+    </footer>
+</div>
+
+<script>
+    document.querySelectorAll('.nav-links a').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href').substring(1);
+            const targetElem = document.getElementById(targetId);
+            if(targetElem) {
+                targetElem.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+</script>
+</body>
+</html>
